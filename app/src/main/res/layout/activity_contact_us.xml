@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Activities.ContactUsActivity">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/toolbar_color"
+        app:title="Contact Us"/>
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/paralbl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="For Queries or Questions Contact me on below email"
+        android:textColor="@color/black"
+        android:textSize="14sp"
+        android:layout_centerInParent="true"
+        android:padding="10dp"
+        android:layout_below="@id/toolbar"
+        android:layout_marginTop="50dp"/>
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/emailTv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="karthickappdeveloper22@gmail.com"
+        android:textColor="@color/primary_Dark"
+        android:textSize="18sp"
+        android:textStyle="italic"
+        android:layout_centerInParent="true"
+        android:layout_below="@id/paralbl"
+        android:padding="10dp"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/contactBtn"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:text="Contact Us"
+        android:textStyle="bold"
+        android:layout_centerInParent="true"
+        android:layout_below="@id/emailTv"
+        android:layout_margin="10dp"/>
+
+</RelativeLayout>

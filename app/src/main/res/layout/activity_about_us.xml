@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Activities.AboutUsActivity">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/toolbar_color" />
+
+    <ImageView
+        android:id="@+id/appIconIv"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_below="@id/toolbar"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="50dp"
+        android:contentDescription="TODO"
+        android:src="@drawable/app_icon" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/appNameLbl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/appIconIv"
+        android:layout_centerHorizontal="true"
+        android:text="IQ Expense"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:textStyle="bold|italic" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/appNameLbl"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="10dp"
+        android:padding="10dp"
+        android:text="My Name is Karthick, I am a Freelancer and I have developed this App for Peoples who are need to Manage their Income and Expenses in this app
+and also Peoples can create their Budgets to Control their Spend Limits for their purposes.I working continuously to provide more services by Creating more Features in this App and Creating New Apps that useful for Peoples so, support me by using this app.For any Queries regarding my app or Contact me for Personal by go through Contact Us section my App!"
+        android:textColor="@color/black" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/versionTv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:layout_alignParentBottom="true"
+        android:text="Version 1.0"
+        android:padding="10dp"
+        android:layout_centerHorizontal="true"/>
+
+</RelativeLayout>

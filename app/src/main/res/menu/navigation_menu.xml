@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:title="Home">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/transactions"
+                    android:title="Transactions" />
+                <item
+                    android:id="@+id/budget"
+                    android:title="Budget" />
+                <item
+                    android:id="@+id/bank"
+                    android:title="Bank Accounts" />
+                <item
+                    android:id="@+id/categories"
+                    android:title="Categories" />
+            </group>
+        </menu>
+
+    </item>
+
+    <item android:title="Help">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/policy"
+                    android:title="Privacy Policy" />
+                <item
+                    android:id="@+id/contact"
+                    android:title="Contact Us" />
+                <item
+                    android:id="@+id/aboutus"
+                    android:title="About Us" />
+            </group>
+        </menu>
+    </item>
+
+    <item android:title="Premium">
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/buy_premium"
+                    android:title="Premium" />
+            </group>
+        </menu>
+    </item>
+</menu>
