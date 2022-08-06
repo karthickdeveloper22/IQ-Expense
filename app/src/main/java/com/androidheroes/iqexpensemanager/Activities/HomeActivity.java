@@ -143,7 +143,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             public void onResponse(String response) {
                 income = response;
                 if (income.isEmpty()) {
-                    binding.incomeTv.setText(symbol + 0);
+                    binding.incomeTv.setText(symbol + "0");
                 } else {
                     binding.incomeTv.setText(symbol + income);
                 }
@@ -174,7 +174,11 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                 expense = response;
                 if (expense.isEmpty()) {
                     binding.expenseTv.setText(symbol + 0);
-                    binding.balanceTv.setText(symbol + income);
+                    if (income.isEmpty()){
+                        binding.balanceTv.setText(symbol + 0);
+                    }else {
+                        binding.balanceTv.setText(symbol + income);
+                    }
                 } else {
                     binding.expenseTv.setText(symbol + expense);
                     balance = Integer.parseInt(income) - Integer.parseInt(expense);
@@ -268,6 +272,13 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                 modelTransactions.clear();
                 try {
                     JSONArray array = new JSONArray(response);
+                    if (array.isNull(0)){
+                        binding.emptyTransaction.setVisibility(View.VISIBLE);
+                        binding.transactionRv.setVisibility(View.GONE);
+                    }else {
+                        binding.emptyTransaction.setVisibility(View.GONE);
+                        binding.transactionRv.setVisibility(View.VISIBLE);
+                    }
                     for (int i = 0; i < array.length(); i++) {
                         JSONObject object = array.getJSONObject(i);
                         int trans_id = object.getInt("trans_id");
