@@ -95,6 +95,7 @@ public class LoginActivity extends AppCompatActivity {
 
             builder.setView(dialogView);
             AlertDialog alertDialog = builder.create();
+            alertDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
             resetPasswordBtn.setOnClickListener(view1 -> {
                 String resetEmail = resetEmailEt.getText().toString().trim();
