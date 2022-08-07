@@ -38,6 +38,7 @@ import com.androidheroes.iqexpensemanager.Constants;
 import com.androidheroes.iqexpensemanager.Models.ModelTransaction;
 import com.androidheroes.iqexpensemanager.Prefs;
 import com.androidheroes.iqexpensemanager.R;
+import com.androidheroes.iqexpensemanager.ApiRest;
 import com.androidheroes.iqexpensemanager.databinding.ActivityHomeBinding;
 import com.google.android.ads.nativetemplates.NativeTemplateStyle;
 import com.google.android.ads.nativetemplates.TemplateView;
@@ -66,6 +67,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 public class HomeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     ActivityHomeBinding binding;
@@ -80,6 +86,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     private Prefs prefs;
     private Boolean premium = false;
     private final int REQUEST_CODE = 11;
+    private ApiRest apirest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +109,13 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         email = getIntent().getStringExtra("email");
 
         prefs = new Prefs(this);
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(Constants.mainUrl)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        apirest = retrofit.create(ApiRest.class);
 
         checkForUpdate();
 
@@ -266,7 +280,37 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void loadTransaction() {
-        StringRequest request = new StringRequest(Request.Method.POST, Constants.mainUrl + "gettransaction.php", new Response.Listener<String>() {
+        Call<List<ModelTransaction>> call = apirest.getTransactions(id);
+        call.enqueue(new Callback<List<ModelTransaction>>() {
+            @Override
+            public void onResponse(Call<List<ModelTransaction>> call, retrofit2.Response<List<ModelTransaction>> response) {
+                if (!response.isSuccessful()) {
+                    progressDialog.dismiss();
+                    Toast.makeText(HomeActivity.this, "" + response.code(), Toast.LENGTH_SHORT).show();
+                } else {
+                    if (response.body().isEmpty()) {
+                        binding.emptyTransaction.setVisibility(View.VISIBLE);
+                        binding.transactionRv.setVisibility(View.GONE);
+                    } else {
+                        binding.emptyTransaction.setVisibility(View.GONE);
+                        binding.transactionRv.setVisibility(View.VISIBLE);
+                    }
+                    List<ModelTransaction> transactionList = response.body();
+                    adapterTrans = new AdapterTrans(transactionList, HomeActivity.this);
+                    binding.transactionRv.setAdapter(adapterTrans);
+                    progressDialog.dismiss();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<ModelTransaction>> call, Throwable t) {
+                progressDialog.dismiss();
+                Toast.makeText(HomeActivity.this, "" + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
+        /*StringRequest request = new StringRequest(Request.Method.POST, Constants.mainUrl + "gettransaction.php", new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 modelTransactions.clear();
@@ -320,7 +364,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             }
         };
 
-        Volley.newRequestQueue(HomeActivity.this).add(request);
+        Volley.newRequestQueue(HomeActivity.this).add(request);*/
     }
 
     @Override

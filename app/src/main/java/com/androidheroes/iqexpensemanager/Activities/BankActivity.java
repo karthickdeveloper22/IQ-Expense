@@ -27,6 +27,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.androidheroes.iqexpensemanager.Adapter.AdapterBankTransactions;
+import com.androidheroes.iqexpensemanager.ApiRest;
 import com.androidheroes.iqexpensemanager.Constants;
 import com.androidheroes.iqexpensemanager.Models.ModelBankTransactions;
 import com.androidheroes.iqexpensemanager.R;
@@ -46,6 +47,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
 public class BankActivity extends AppCompatActivity {
 
     private ActivityBankBinding binding;
@@ -58,6 +64,7 @@ public class BankActivity extends AppCompatActivity {
     private ArrayAdapter<String> adapterBanks;
     private List<ModelBankTransactions> bankTransactionsList;
     private AdapterBankTransactions adapterBankTransactions;
+    private ApiRest apiRest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +80,13 @@ public class BankActivity extends AppCompatActivity {
         subscribed = preferences.getInt("subscribed", 0);
 
         progressDialog = new ProgressDialog(BankActivity.this);
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(Constants.mainUrl)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        apiRest = retrofit.create(ApiRest.class);
 
         getBankAccounts();
 
@@ -97,32 +111,39 @@ public class BankActivity extends AppCompatActivity {
                 bankIdLists.clear();
                 try {
                     JSONArray array = new JSONArray(response);
-                    for (int i = 0; i < array.length(); i++) {
-                        JSONObject object = array.getJSONObject(i);
-                        String name = object.getString("bank_name");
-                        int bank_id = object.getInt("bank_id");
-                        bankLists.add(name);
-                        bankIdLists.add(String.valueOf(bank_id));
-                        adapterBanks = new ArrayAdapter(BankActivity.this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, bankLists);
-                        binding.bankAccountEt.setAdapter(adapterBanks);
-
-                        binding.bankAccountEt.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                            @Override
-                            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                                bankid = bankIdLists.get(i);
-                                loadBankTransactionDetails(bankIdLists.get(i));
-                            }
-                        });
-
+                    if (array.isNull(0)) {
+                        Toast.makeText(BankActivity.this, "No Accounts Found!", Toast.LENGTH_SHORT).show();
                         progressDialog.dismiss();
+                    } else {
+                        for (int i = 0; i < array.length(); i++) {
+                            JSONObject object = array.getJSONObject(i);
+                            String name = object.getString("bank_name");
+                            int bank_id = object.getInt("bank_id");
+                            bankLists.add(name);
+                            bankIdLists.add(String.valueOf(bank_id));
+                            adapterBanks = new ArrayAdapter(BankActivity.this, androidx.appcompat.R.layout.support_simple_spinner_dropdown_item, bankLists);
+                            binding.bankAccountEt.setAdapter(adapterBanks);
+
+                            binding.bankAccountEt.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                @Override
+                                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                                    bankid = bankIdLists.get(i);
+                                    loadBankTransactionDetails(bankIdLists.get(i));
+                                }
+                            });
+
+                            progressDialog.dismiss();
+                        }
                     }
                 } catch (Exception e) {
+                    progressDialog.dismiss();
                     Toast.makeText(BankActivity.this, "" + e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                progressDialog.dismiss();
                 Toast.makeText(BankActivity.this, "" + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }) {
@@ -138,12 +159,43 @@ public class BankActivity extends AppCompatActivity {
         Volley.newRequestQueue(BankActivity.this).add(request);
     }
 
-    private void loadBankTransactionDetails(String s) {
+    private void loadBankTransactionDetails(String bank_id) {
         progressDialog.setMessage("Getting Bank Details...");
         progressDialog.show();
         binding.transactionDetailsRl.setVisibility(View.VISIBLE);
 
-        bankTransactionsList = new ArrayList<>();
+        Call<List<ModelBankTransactions>> call = apiRest.getBankTransactions(id, bank_id);
+
+        call.enqueue(new Callback<List<ModelBankTransactions>>() {
+            @Override
+            public void onResponse(Call<List<ModelBankTransactions>> call, retrofit2.Response<List<ModelBankTransactions>> response) {
+                if (!response.isSuccessful()) {
+                    progressDialog.dismiss();
+                    Toast.makeText(BankActivity.this, "" + response.code(), Toast.LENGTH_SHORT).show();
+                } else {
+                    if (response.body().isEmpty()) {
+                        binding.emptyTransaction.setVisibility(View.VISIBLE);
+                        binding.transactionRv.setVisibility(View.GONE);
+                    } else {
+                        binding.emptyTransaction.setVisibility(View.GONE);
+                        binding.transactionRv.setVisibility(View.VISIBLE);
+                    }
+                    List<ModelBankTransactions> modelBankTransactionsList = response.body();
+                    adapterBankTransactions = new AdapterBankTransactions(modelBankTransactionsList, BankActivity.this);
+                    binding.transactionRv.setAdapter(adapterBankTransactions);
+                    progressDialog.dismiss();
+                    binding.swiperefreshLy.setRefreshing(false);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<ModelBankTransactions>> call, Throwable t) {
+                progressDialog.dismiss();
+                Toast.makeText(BankActivity.this, "" + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        /*bankTransactionsList = new ArrayList<>();
 
         StringRequest request = new StringRequest(Request.Method.POST, Constants.mainUrl + "get_bank_transactions.php", new Response.Listener<String>() {
             @Override
@@ -189,13 +241,13 @@ public class BankActivity extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
-                params.put("bank_id", s);
+                params.put("bank_id", bank_id);
                 params.put("userid", id);
                 return params;
             }
         };
 
-        Volley.newRequestQueue(BankActivity.this).add(request);
+        Volley.newRequestQueue(BankActivity.this).add(request);*/
     }
 
     @Override
